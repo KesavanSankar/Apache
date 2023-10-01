@@ -1,0 +1,61 @@
+
+CREATE TABLE imdb_data (
+    title STRING,
+    release_year INT,
+    genre STRING,
+    rating FLOAT,
+    director STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t';
+
+
+
+LOAD DATA LOCAL INPATH 'path/to/imdb_data.csv' OVERWRITE INTO TABLE imdb_data;
+
+
+SELECT * FROM imdb_data LIMIT 10;
+
+INSERT OVERWRITE TABLE imdb_data
+SELECT * FROM imdb_data WHERE release_year > 2000;
+
+CREATE TABLE new_imdb_data AS
+SELECT * FROM imdb_data WHERE release_year <= 2000;
+
+DROP TABLE imdb_data;
+ALTER TABLE new_imdb_data RENAME TO imdb_data;
+
+***********************************************************************************************************************************
+
+Bucketing is a technique in Hive where data is divided into buckets based on the hash value of a column. It optimizes storage and retrieval by reducing the number of data files to scan during queries. 
+
+CREATE TABLE bucketed_table (
+    id INT,
+    name STRING
+)
+CLUSTERED BY (id) INTO 4 BUCKETS;
+
+***********************************************************************************************************************************
+
+Optimizing query performance in Hive involves techniques like partitioning, bucketing, and indexing. Indexing allows for faster data retrieval, especially when filtering on indexed columns. However, it comes with overhead during data loading. Use indexing for columns commonly used in WHERE clauses, such as:
+
+CREATE INDEX idx_name ON TABLE table_name (name) AS 'COMPACT';
+
+***********************************************************************************************************************************
+Complex data types like ARRAY and MAP in Hive enable the storage of structured data. For example, querying an array:
+
+SELECT id, names[0] AS first_name
+FROM array_table;
+
+***********************************************************************************************************************************
+
+A Hive UDF allows users to define custom functions for specific use cases. For example, creating a UDF to concatenate strings:
+
+public class ConcatUDF extends UDF {
+    public String evaluate(String str1, String str2) {
+        if (str1 == null || str2 == null) {
+            return null;
+        }
+        return str1 + str2;
+    }
+}
